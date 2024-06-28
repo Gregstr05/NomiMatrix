@@ -25,6 +25,10 @@
 
 #include "math.h"
 
+#include <stdio.h>
+#include <string.h>
+#include <stdarg.h>
+
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -82,6 +86,8 @@ void WS2812_Send (void);
 void Shift(void);
 void shiftActive(void);
 void HAL_TIM_PWM_PulseFinishedCallback(TIM_HandleTypeDef *htim);
+
+void myprintf(const char *fmt, ...);
 
 
 /* USER CODE END PFP */
@@ -201,6 +207,21 @@ void HAL_TIM_PWM_PulseFinishedCallback(TIM_HandleTypeDef *htim);
 			}
 		}
 
+
+
+		void myprintf(const char *fmt, ...)
+		{
+		  static char buffer[256];
+		  va_list args;
+		  va_start(args, fmt);
+		  vsnprintf(buffer, sizeof(buffer), fmt, args);
+		  va_end(args);
+
+		  int len = strlen(buffer);
+		  HAL_UART_Transmit(&huart2, (uint8_t*)buffer, len, -1);
+
+		}
+
 /* USER CODE END 0 */
 
 /**
@@ -279,6 +300,41 @@ int main(void)
 	  else
 		  Set_LED(i, 255, 140, 0);
   }*/
+
+  myprintf("\r\n~ This is an SD card test ~\r\n\r\n");
+
+  HAL_Delay(1000);
+
+  FATFS FatFs;
+  FIL fil;
+  FRESULT fres;
+
+  fres = f_mount(&FatFs, "", 1);
+  if (fres != FR_OK)
+  {
+	  myprintf("f_mount error (%i)\r\n", fres);
+	  while(1);
+  }
+
+  fres = f_open(&fil, "file.txt", FA_READ);
+    if (fres != FR_OK)
+    {
+    	myprintf("f_open error (%i)\r\n");
+  		while(1);
+    }
+    myprintf("I was able to open 'file.txt' for reading!\r\n");
+
+    BYTE readBuf[30];
+
+    TCHAR* rres = f_gets((TCHAR*)readBuf, 30, &fil);
+    if(rres != 0)
+    {
+    	myprintf("Read string from 'file.txt' contents: %s\r\n", readBuf);
+    	  } else {
+    		myprintf("f_gets error (%i)\r\n", fres);
+    }
+
+    f_close(&fil);
 
   /* USER CODE END 2 */
 
