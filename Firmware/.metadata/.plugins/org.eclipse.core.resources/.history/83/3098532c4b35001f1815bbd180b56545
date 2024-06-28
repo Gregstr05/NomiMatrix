@@ -98,7 +98,7 @@ void HAL_TIM_PWM_PulseFinishedCallback(TIM_HandleTypeDef *htim);
 		Set_LED(LEDnum, colour.r, colour.g, colour.b);
 	}
 
-	void Set_LED (int LEDnum, int8_t Red, int8_t Green, int8_t Blue)
+	void Set_LED (int LEDnum, int Red, int Green, int Blue)
 		{
 			LED_Data[LEDnum][0] = LEDnum;
 			LED_Data[LEDnum][1] = Green;
@@ -108,7 +108,7 @@ void HAL_TIM_PWM_PulseFinishedCallback(TIM_HandleTypeDef *htim);
 
 		#define PI 3.14159265
 
-		void Set_Brightness (int8_t brightness)  // 0-45
+		void Set_Brightness (int brightness)  // 0-45
 		{
 		#if USE_BRIGHTNESS
 

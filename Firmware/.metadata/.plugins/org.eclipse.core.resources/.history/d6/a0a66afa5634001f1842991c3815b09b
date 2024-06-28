@@ -31,16 +31,15 @@
 
 typedef struct
 {
-	int8_t r;
-	int8_t g;
-	int8_t b;
+	int r;
+	int g;
+	int b;
 } COLOUR;
 
 /* USER CODE END PTD */
 
 /* Private define ------------------------------------------------------------*/
 /* USER CODE BEGIN PD */
-	#define MAX_LED 200
 
 /* USER CODE END PD */
 
@@ -58,7 +57,7 @@ UART_HandleTypeDef huart2;
 /* USER CODE BEGIN PV */
 
 COLOUR rainbow[6] = {};
-COLOUR activeRainbow[MAX_LED/10];
+COLOUR activeRainbow[10];
 int state = 0;
 
 /* USER CODE END PV */
@@ -71,9 +70,9 @@ static void MX_USART2_UART_Init(void);
 static void MX_TIM1_Init(void);
 /* USER CODE BEGIN PFP */
 
-void Set_LED (int LEDnum, int8_t Red, int8_t Green, int8_t Blue);
+void Set_LED (int LEDnum, int Red, int Green, int Blue);
 void Set_LED_struct(int LEDnum, COLOUR colour);
-void Set_Brightness (int8_t brightness);
+void Set_Brightness (int brightness);
 void WS2812_Send (void);
 void Shift(void);
 void shiftActive(void);
@@ -84,6 +83,7 @@ void HAL_TIM_PWM_PulseFinishedCallback(TIM_HandleTypeDef *htim);
 
 /* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
+	#define MAX_LED 200
 	#define USE_BRIGHTNESS 1
 
 	uint16_t pwmData[(24*MAX_LED)+50];
@@ -98,7 +98,7 @@ void HAL_TIM_PWM_PulseFinishedCallback(TIM_HandleTypeDef *htim);
 		Set_LED(LEDnum, colour.r, colour.g, colour.b);
 	}
 
-	void Set_LED (int LEDnum, int8_t Red, int8_t Green, int8_t Blue)
+	void Set_LED (int LEDnum, int Red, int Green, int Blue)
 		{
 			LED_Data[LEDnum][0] = LEDnum;
 			LED_Data[LEDnum][1] = Green;
@@ -108,7 +108,7 @@ void HAL_TIM_PWM_PulseFinishedCallback(TIM_HandleTypeDef *htim);
 
 		#define PI 3.14159265
 
-		void Set_Brightness (int8_t brightness)  // 0-45
+		void Set_Brightness (int brightness)  // 0-45
 		{
 		#if USE_BRIGHTNESS
 
@@ -191,7 +191,7 @@ void HAL_TIM_PWM_PulseFinishedCallback(TIM_HandleTypeDef *htim);
 		void shiftActive(void)
 		{
 			Shift();
-			for(int i = 0; i<MAX_LED/10; i++)
+			for(int i = 0; i<20; i++)
 			{
 				activeRainbow[i] = rainbow[((i)<6)?i:(i)-6];
 			}
@@ -313,7 +313,7 @@ int main(void)
 	  }
 	  */
 
-	  for (int i = 0; i<MAX_LED; i++)
+	  for (int i = 0; i<100; i++)
 	    {
 	  	  if(i<10)
 	  		  Set_LED_struct(i, activeRainbow[0]);

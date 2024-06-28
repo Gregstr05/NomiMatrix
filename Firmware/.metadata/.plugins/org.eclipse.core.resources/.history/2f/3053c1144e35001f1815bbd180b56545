@@ -57,7 +57,7 @@ UART_HandleTypeDef huart2;
 
 /* USER CODE BEGIN PV */
 
-COLOUR rainbow[6] = {};
+COLOUR rainbow[10] = {};
 COLOUR activeRainbow[MAX_LED/10];
 int state = 0;
 

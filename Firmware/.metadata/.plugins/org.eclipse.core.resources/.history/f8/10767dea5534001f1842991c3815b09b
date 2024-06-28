@@ -29,18 +29,11 @@
 /* Private typedef -----------------------------------------------------------*/
 /* USER CODE BEGIN PTD */
 
-typedef struct
-{
-	int8_t r;
-	int8_t g;
-	int8_t b;
-} COLOUR;
 
 /* USER CODE END PTD */
 
 /* Private define ------------------------------------------------------------*/
 /* USER CODE BEGIN PD */
-	#define MAX_LED 200
 
 /* USER CODE END PD */
 
@@ -57,9 +50,6 @@ UART_HandleTypeDef huart2;
 
 /* USER CODE BEGIN PV */
 
-COLOUR rainbow[6] = {};
-COLOUR activeRainbow[MAX_LED/10];
-int state = 0;
 
 /* USER CODE END PV */
 
@@ -71,12 +61,9 @@ static void MX_USART2_UART_Init(void);
 static void MX_TIM1_Init(void);
 /* USER CODE BEGIN PFP */
 
-void Set_LED (int LEDnum, int8_t Red, int8_t Green, int8_t Blue);
-void Set_LED_struct(int LEDnum, COLOUR colour);
-void Set_Brightness (int8_t brightness);
+void Set_LED (int LEDnum, int Red, int Green, int Blue);
+void Set_Brightness (int brightness);
 void WS2812_Send (void);
-void Shift(void);
-void shiftActive(void);
 void HAL_TIM_PWM_PulseFinishedCallback(TIM_HandleTypeDef *htim);
 
 
@@ -84,6 +71,7 @@ void HAL_TIM_PWM_PulseFinishedCallback(TIM_HandleTypeDef *htim);
 
 /* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
+	#define MAX_LED 100
 	#define USE_BRIGHTNESS 1
 
 	uint16_t pwmData[(24*MAX_LED)+50];
@@ -93,12 +81,8 @@ void HAL_TIM_PWM_PulseFinishedCallback(TIM_HandleTypeDef *htim);
 	uint8_t LED_Data[MAX_LED][4];
 	uint8_t LED_Mod[MAX_LED][4];  // for brightness
 
-	void Set_LED_struct(int LEDnum, COLOUR colour)
-	{
-		Set_LED(LEDnum, colour.r, colour.g, colour.b);
-	}
 
-	void Set_LED (int LEDnum, int8_t Red, int8_t Green, int8_t Blue)
+	void Set_LED (int LEDnum, int Red, int Green, int Blue)
 		{
 			LED_Data[LEDnum][0] = LEDnum;
 			LED_Data[LEDnum][1] = Green;
@@ -108,7 +92,7 @@ void HAL_TIM_PWM_PulseFinishedCallback(TIM_HandleTypeDef *htim);
 
 		#define PI 3.14159265
 
-		void Set_Brightness (int8_t brightness)  // 0-45
+		void Set_Brightness (int brightness)  // 0-45
 		{
 		#if USE_BRIGHTNESS
 
@@ -172,31 +156,6 @@ void HAL_TIM_PWM_PulseFinishedCallback(TIM_HandleTypeDef *htim);
 			HAL_TIM_PWM_Stop_DMA(&htim1, TIM_CHANNEL_1);
 			datasentflag=1;
 		}
-
-		void Shift(void)
-		{
-			COLOUR help;
-			if(state == 6)
-				state = 0;
-
-			help = rainbow[0];
-			for(int i = 0; i<5; i++)
-			{
-				rainbow[i] = rainbow[i+1];
-			}
-			rainbow[5] = help;
-
-		}
-
-		void shiftActive(void)
-		{
-			Shift();
-			for(int i = 0; i<MAX_LED/10; i++)
-			{
-				activeRainbow[i] = rainbow[((i)<6)?i:(i)-6];
-			}
-		}
-
 /* USER CODE END 0 */
 
 /**
@@ -233,23 +192,7 @@ int main(void)
   MX_TIM1_Init();
   /* USER CODE BEGIN 2 */
 
-  	  /*Set_LED(0, 255, 0, 0);
-  	  Set_LED(1, 0, 255, 0);
-  	  Set_LED(2, 0, 0, 255);
 
-  	  Set_LED(3, 46, 89, 128);
-
-  	  Set_LED(4, 156, 233, 100);
-  	  Set_LED(5, 102, 0, 235);
-  	  Set_LED(6, 47, 38, 77);
-*/
-  rainbow[0] = (COLOUR) {255, 0, 0};
-  rainbow[1] = (COLOUR) {255, 140, 0};
-  rainbow[2] = (COLOUR) {255, 255, 0};
-  rainbow[3] = (COLOUR) {0, 255, 0};
-  rainbow[4] = (COLOUR) {0, 0, 255};
-  rainbow[5] = (COLOUR) {170, 0, 255};
-  /*
   for (int i = 0; i<100; i++)
   {
 	  if(i<10)
@@ -272,7 +215,7 @@ int main(void)
 		  Set_LED(i, 255, 255, 0);
 	  else
 		  Set_LED(i, 255, 140, 0);
-  }*/
+  }
 
   /* USER CODE END 2 */
 
@@ -284,7 +227,6 @@ int main(void)
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
-	  /*
 	  for (int i=0; i<46; i++)
 	  	  {
 	  		  Set_Brightness(i);
@@ -298,49 +240,6 @@ int main(void)
 		  WS2812_Send();
 		  HAL_Delay (50);
 	  }
-	  for(int i = 0; i<10; i++)
-	  {
-		  for(int j = 0; j<100; j++)
-		  {
-			  if(j/(i*10)==1 || (j<11 && i==1))
-				  Set_LED_struct(j, rainbow[2]);
-			  else
-				  Set_LED_struct(j, rainbow[3]);
-		  }
-		  Set_Brightness(5);
-		  WS2812_Send();
-		  HAL_Delay (500);
-	  }
-	  */
-
-	  for (int i = 0; i<MAX_LED; i++)
-	    {
-	  	  if(i<10)
-	  		  Set_LED_struct(i, activeRainbow[0]);
-	  	  else if(i<20)
-	  		  Set_LED_struct(i, activeRainbow[1]);
-	  	  else if(i<30)
-	  		  Set_LED_struct(i, activeRainbow[2]);
-	  	  else if(i<40)
-	  		  Set_LED_struct(i, activeRainbow[3]);
-	  	  else if(i<50)
-	  		  Set_LED_struct(i, activeRainbow[4]);
-	  	  else if(i<60)
-	  		  Set_LED_struct(i, activeRainbow[5]);
-	  	  else if(i<70)
-	  		  Set_LED_struct(i, activeRainbow[6]);
-	  	  else if(i<80)
-	  		  Set_LED_struct(i, activeRainbow[7]);
-	  	  else if(i<90)
-	  		  Set_LED_struct(i, activeRainbow[8]);
-	  	  else
-	  		  Set_LED_struct(i, activeRainbow[9]);
-	    }
-	  Set_Brightness(5);
-	  		  WS2812_Send();
-	  		  HAL_Delay (100);
-	  		  state++;
-	  shiftActive();
   }
   /* USER CODE END 3 */
 }
